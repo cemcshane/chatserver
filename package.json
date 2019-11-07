@@ -1,0 +1,23 @@
+{
+  "name": "module6grp",
+  "version": "1.0.0",  
+  "description": "Chat room group project",
+  "main": "chat-server.js",
+  "dependencies": {
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cse330-fall-2019/module6-group-cemcshaneteam6.git"
+  },
+  "author": "Claire McShane",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cse330-fall-2019/module6-group-cemcshaneteam6/issues"
+  },
+  "homepage": "https://github.com/cse330-fall-2019/module6-group-cemcshaneteam6#readme"
+}
