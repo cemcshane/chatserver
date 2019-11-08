@@ -5,6 +5,7 @@
       <script type ="text/javascript">
 
     var socketio = io.connect();
+    
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
          socketio.emit("message_to_server", {message:msg});
