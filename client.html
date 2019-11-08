@@ -4,23 +4,37 @@
       <script src="/socket.io/socket.io.js"></script>
       <script type ="text/javascript">
 
-      var socketio = io.connect();
-      socketio.on("message_to_client",function(data) {
-         //Append an HR thematic break and the escaped HTML of the new message
-         document.getElementById("chatlog").appendChild(document.createElement("hr"));
-         document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
-      });
-
+    var socketio = io.connect();
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
          socketio.emit("message_to_server", {message:msg});
+         socketio.on("message_to_client",function(data) {
+            //Append an HR thematic break and the escaped HTML of the new message
+            document.getElementById("chatlog").appendChild(document.createElement("hr"));
+            document.getElementById("chatlog").appendChild(document.createTextNode(`${data["user"]}: ${data["message"]}`));
+        });
+      }
+
+      function createNick(){
+          var name = document.getElementById("nick").value;
+          socketio.emit("name_to_server", {nickname:name});
+          socketio.on("name_to_client",function(data) {
+            document.getElementById("displayNickname").style.visibility = "hidden";
+            document.getElementById("displayChat").style.visibility = "visible";
+          });
       }
 
       </script>
    </head>
    <body>
-      <input type=text" id="message_input"/>
-      <button onclick="sendMessage()">send</button>
-      <div id="chatlog"></div>
-   </body>
+    <div id="displayNickname">
+        <input type="text" id="nick"/>
+        <button onclick="createNick()">send</button>
+    </div>
+    <div id="displayChat" style="visibility:hidden;">
+        <input type="text" id="message_input"/>
+        <button onclick="sendMessage()">send</button>
+        <div id="chatlog"></div>
+    </div>
+</body>
 </html>
