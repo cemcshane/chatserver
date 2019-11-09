@@ -33,4 +33,16 @@ io.sockets.on("connection", function(socket){
         console.log("message: "+data["message"]); // log it to the Node.JS output
 		io.sockets.emit("message_to_client",{message:data["message"], user:socket.nickname}) // broadcast the message to other users
     });
+    socket.on('room_to_server', function(data) {
+        // This callback runs when the server receives a new message from the client.
+        socket.join(data["newroom"]);        
+        console.log("Room joined: "+data["newroom"]); // log it to the Node.JS output
+		io.sockets.emit("room_to_client",{room:data["newroom"], user:socket.nickname}) // broadcast the message to other users
+    });
+    socket.on('joinroom_to_server', function(data) {
+        // This callback runs when the server receives a new message from the client.
+        socket.join(data["joinroom"]);        
+        console.log("Room joined: "+data["joinroom"]); // log it to the Node.JS output
+		io.sockets.emit("joinroom_to_client",{room:data["joinroom"], user:socket.nickname}) // broadcast the message to other users
+    });
 });

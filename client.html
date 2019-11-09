@@ -5,15 +5,30 @@
       <script type ="text/javascript">
 
     var socketio = io.connect();
-         socketio.on("message_to_client",function(data) {
+        socketio.on("message_to_client",function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
             document.getElementById("chatlog").appendChild(document.createElement("hr"));
             document.getElementById("chatlog").appendChild(document.createTextNode(`${data["user"]}: ${data["message"]}`));
-        });    
+        });
+        socketio.on("room_to_client",function(data) {
+            //Append an HR thematic break and the escaped HTML of the new message
+            document.getElementById("rooms").appendChild(document.createTextNode(`${data["room"]}`));
+            document.getElementById("rooms").appendChild(document.createElement("br"));
+        });
+        socketio.on("joinroom_to_client",function(data) {
+            // do something
+        });
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
          socketio.emit("message_to_server", {message:msg});
-
+      }
+      function createRoom(){
+         var rm = document.getElementById("newRoom").value;
+         socketio.emit("room_to_server", {newroom:rm});
+      }
+      function joinRoom(){
+         var rm = document.getElementById("joinRoom").value;
+         socketio.emit("joinroom_to_server", {joinroom:rm});
       }
 
       function createNick(){
@@ -28,14 +43,34 @@
       </script>
    </head>
    <body>
+     <h1>Chat Room</h1>
     <div id="displayNickname">
+      <label>Nickname:
         <input type="text" id="nick"/>
-        <button onclick="createNick()">send</button>
+        <button onclick="createNick()">Create nickname</button>
+      </label>
     </div>
     <div id="displayChat" style="visibility:hidden;">
+      <label>Send a message:
         <input type="text" id="message_input"/>
-        <button onclick="sendMessage()">send</button>
+        <button onclick="sendMessage()">Send</button>
         <div id="chatlog"></div>
+      </label>
+      <br><br><br>
+      <label>Create a chat room:
+          <input type="text" id="newRoom"/>
+          <button onclick="createRoom()">Create room</button>
+      </label>
+      <br><br>
+      <label>Join a chat room:
+          <input type="text" id="joinRoom" placeholder="Room name"/>
+          <button onclick="joinRoom()">Join room</button>
+      </label>      
+      <br><br>
+      <label>Available Rooms:
+          <div id="rooms"></div>
+      </label>
     </div>
+
 </body>
 </html>
