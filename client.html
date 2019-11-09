@@ -16,19 +16,22 @@
             document.getElementById("rooms").appendChild(document.createElement("br"));
         });
         socketio.on("joinroom_to_client",function(data) {
-            // do something
+          while (document.getElementById("chatlog").firstChild) {
+            document.getElementById("chatlog").removeChild(document.getElementById("chatlog").firstChild);
+          }
+          document.getElementById("thisroom").innerHTML = `${data["room"]}`;
         });
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
-         socketio.emit("message_to_server", {message:msg});
+         socketio.emit("message_to_server", {message:msg, room:`${document.getElementById("thisroom").innerHTML}`});
       }
       function createRoom(){
          var rm = document.getElementById("newRoom").value;
-         socketio.emit("room_to_server", {newroom:rm});
+         socketio.emit("room_to_server", {newroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
       }
       function joinRoom(){
          var rm = document.getElementById("joinRoom").value;
-         socketio.emit("joinroom_to_server", {joinroom:rm});
+         socketio.emit("joinroom_to_server", {joinroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
       }
 
       function createNick(){
@@ -43,7 +46,7 @@
       </script>
    </head>
    <body>
-     <h1>Chat Room</h1>
+     <h1 id="thisroom">Main Chat Room</h1>
     <div id="displayNickname">
       <label>Nickname:
         <input type="text" id="nick"/>
@@ -68,7 +71,7 @@
       </label>      
       <br><br>
       <label>Available Rooms:
-          <div id="rooms"></div>
+          <div id="rooms">Main Chat Room<br></div>
       </label>
     </div>
 
