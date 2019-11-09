@@ -1,3 +1,4 @@
+// All foundational code from example code in Socket.io class wiki
 // Require the packages we will use:
 var http = require("http"),
 	socketio = require("socket.io"),

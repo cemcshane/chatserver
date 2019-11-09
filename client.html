@@ -3,7 +3,7 @@
    <head>
       <script src="/socket.io/socket.io.js"></script>
       <script type ="text/javascript">
-
+    // All foundational code from example code in Socket.io class wiki
     var socketio = io.connect();
         socketio.on("message_to_client",function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
@@ -16,6 +16,7 @@
             document.getElementById("rooms").appendChild(document.createElement("br"));
         });
         socketio.on("joinroom_to_client",function(data) {
+          // while loop code found on https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
           while (document.getElementById("chatlog").firstChild) {
             document.getElementById("chatlog").removeChild(document.getElementById("chatlog").firstChild);
           }
