@@ -102,11 +102,33 @@
       }
       function createRoom(){
          var rm = document.getElementById("newRoom").value;
-         socketio.emit("room_to_server", {newroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
+         for (let element of document.getElementById("rooms").childNodes){
+           if (element.textContent==rm){
+              alert("This room already exists");
+              break;
+           }
+           if(document.getElementById("rooms").lastChild==element&&element!=rm){
+              socketio.emit("room_to_server", {newroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
+           }
+         } 
       }
       function joinRoom(){
          var rm = document.getElementById("joinRoom").value;
-         socketio.emit("joinroom_to_server", {joinroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
+         for (let element of document.getElementById("rooms").childNodes){
+           if(rm!=document.getElementById("thisroom").textContent){
+            if (document.getElementById("rooms").lastChild==element&&element!=rm){
+                alert("This room doesn't exist");   
+            }
+            if(element.textContent==rm){
+                socketio.emit("joinroom_to_server", {joinroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
+                break;
+            }             
+           }
+           else{
+             alert("You are already in this room");
+             break;
+           }
+         }  
       }
       function createNick(){
           var name = document.getElementById("nick").value;
