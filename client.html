@@ -31,7 +31,6 @@
           max-width: 450px;
           left: 485px; 
         }
-
       </style>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,6 +43,13 @@
         socketio.on("name_to_client",function(data) {
             document.getElementById("displayNickname").style.visibility = "hidden";
             document.getElementById("displayChat").style.visibility = "visible";
+            while (document.getElementById("memberlist").firstChild){
+              document.getElementById("memberlist").removeChild(document.getElementById("memberlist").firstChild);
+            }
+            data["users"].forEach(element => {
+              document.getElementById("memberlist").appendChild(document.createTextNode(element));
+              document.getElementById("memberlist").appendChild(document.createElement("br"));
+            });
         });
         socketio.on("message_to_client",function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
@@ -55,13 +61,41 @@
             document.getElementById("rooms").appendChild(document.createTextNode(`${data["room"]}`));
             document.getElementById("rooms").appendChild(document.createElement("br"));
         });
-        socketio.on("joinroom_to_client",function(data) {
+        socketio.on("joinroom_to_client", function(data) {
           // while loop code found on https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
-          while (document.getElementById("chatlog").firstChild) {
-            document.getElementById("chatlog").removeChild(document.getElementById("chatlog").firstChild);
+          while (document.getElementById("memberlist").firstChild){
+              document.getElementById("memberlist").removeChild(document.getElementById("memberlist").firstChild);
+          }
+          if (data["change"]=="yes"){
+            while (document.getElementById("chatlog").firstChild) {
+              document.getElementById("chatlog").removeChild(document.getElementById("chatlog").firstChild);
+            }            
           }
           document.getElementById("thisroom").innerHTML = `${data["room"]}`;
+          data["users"].forEach(element => {
+              document.getElementById("memberlist").appendChild(document.createTextNode(element));
+              document.getElementById("memberlist").appendChild(document.createElement("br"));
+          });
         });
+      function clearMems(array){
+        let k=0;
+        let i;
+        // do case for when array is longer than current one
+          for (i=0; i<2*document.getElementById("memberlist").childElementCount; i++) {
+              if (i>(2*array.length-1)){
+                document.getElementById("memberlist").removeChild(document.getElementById("memberlist").childNodes[i]);
+              }
+              else{
+                if (i%2==0){
+                  document.getElementById("memberlist").replaceChild(document.createTextNode(array[k]), document.getElementById("memberlist").childNodes[i]);
+                  k++;
+                }
+                else{
+                  document.getElementById("memberlist").replaceChild(document.createElement("br"), document.getElementById("memberlist").childNodes[i]);
+                }             
+              }
+          }
+      }
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
          socketio.emit("message_to_server", {message:msg, room:`${document.getElementById("thisroom").innerHTML}`});
@@ -74,13 +108,10 @@
          var rm = document.getElementById("joinRoom").value;
          socketio.emit("joinroom_to_server", {joinroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
       }
-
       function createNick(){
           var name = document.getElementById("nick").value;
           socketio.emit("name_to_server", {nickname:name});
-
       }
-
       </script>
    </head>
    <body>
@@ -115,6 +146,5 @@
         <br><br><br>
       </div>
     </div>
-
 </body>
 </html>
