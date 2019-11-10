@@ -23,6 +23,7 @@ app.listen(3456);
 // Do the Socket.IO magic:
 var io = socketio.listen(app);
 let mems = [[]];
+let pwds = new Map();
 let roomId = 0;
 let map = new Map();
 map.set("Main Chat Room", 0);

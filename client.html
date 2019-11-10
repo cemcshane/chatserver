@@ -77,25 +77,25 @@
               document.getElementById("memberlist").appendChild(document.createElement("br"));
           });
         });
-      function clearMems(array){
-        let k=0;
-        let i;
-        // do case for when array is longer than current one
-          for (i=0; i<2*document.getElementById("memberlist").childElementCount; i++) {
-              if (i>(2*array.length-1)){
-                document.getElementById("memberlist").removeChild(document.getElementById("memberlist").childNodes[i]);
-              }
-              else{
-                if (i%2==0){
-                  document.getElementById("memberlist").replaceChild(document.createTextNode(array[k]), document.getElementById("memberlist").childNodes[i]);
-                  k++;
-                }
-                else{
-                  document.getElementById("memberlist").replaceChild(document.createElement("br"), document.getElementById("memberlist").childNodes[i]);
-                }             
-              }
-          }
-      }
+      // function clearMems(array){
+      //   let k=0;
+      //   let i;
+      //   // do case for when array is longer than current one
+      //     for (i=0; i<2*document.getElementById("memberlist").childElementCount; i++) {
+      //         if (i>(2*array.length-1)){
+      //           document.getElementById("memberlist").removeChild(document.getElementById("memberlist").childNodes[i]);
+      //         }
+      //         else{
+      //           if (i%2==0){
+      //             document.getElementById("memberlist").replaceChild(document.createTextNode(array[k]), document.getElementById("memberlist").childNodes[i]);
+      //             k++;
+      //           }
+      //           else{
+      //             document.getElementById("memberlist").replaceChild(document.createElement("br"), document.getElementById("memberlist").childNodes[i]);
+      //           }             
+      //         }
+      //     }
+      // }
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
          socketio.emit("message_to_server", {message:msg, room:`${document.getElementById("thisroom").innerHTML}`});
@@ -108,7 +108,17 @@
               break;
            }
            if(document.getElementById("rooms").lastChild==element&&element!=rm){
-              socketio.emit("room_to_server", {newroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
+             if(document.getElementById("isprivate").checked){
+               let pass = prompt("Please enter a password");
+               let priv="yes";
+               socketio.emit("room_to_server", {prv:priv, pwd:pass, newroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
+             }
+             else{
+               pass= "";
+               priv="no";
+               socketio.emit("room_to_server", {prv:priv, pwd:pass, newroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
+             }
+              
            }
          } 
       }
@@ -149,11 +159,15 @@
         <div id="memberlist"></div>
       </div>
       <div id="roomlist">
-        Create a chat room:
+        <strong>Create a chat room:</strong>
             <input type="text" id="newRoom" placeholder="Room name"/>
-            <button onclick="createRoom()">Create room</button>
+            <br>
+            Private?  
+            Yes<input type="radio" name="priv" value=0 id="isprivate"/>
+            No<input type="radio" name="priv" value=1 id="notprivate" checked="checked"/><br>
+            <button onclick="createRoom()">Create room</button>   
             <br><br>
-        Join a chat room:
+        <strong>Join a chat room:</strong>
             <input type="text" id="joinRoom" placeholder="Room name"/>
             <button onclick="joinRoom()">Join room</button>    
             <br><br>
