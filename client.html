@@ -77,6 +77,16 @@
               document.getElementById("memberlist").appendChild(document.createElement("br"));
           });
         });
+        socketio.on("pass_to_client",function(data) {
+          let ps = prompt("Please enter the password for this room");
+          socketio.emit("passcheck", {guess:ps, joinroom:data["joinroom"], curr:data["curr"]});
+        });
+        socketio.on("incorrectpass",function(data) {
+            alert("Incorrect password");
+        });
+        socketio.on("canjoin", function(data){
+            socketio.emit("joinroom_to_server", {joinroom:data["joinroom"], curr:data["curr"]});
+        });
       // function clearMems(array){
       //   let k=0;
       //   let i;
@@ -109,7 +119,7 @@
            }
            if(document.getElementById("rooms").lastChild==element&&element!=rm){
              if(document.getElementById("isprivate").checked){
-               let pass = prompt("Please enter a password");
+               let pass = prompt("Please enter a password for your new room");
                let priv="yes";
                socketio.emit("room_to_server", {prv:priv, pwd:pass, newroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
              }
@@ -130,9 +140,10 @@
                 alert("This room doesn't exist");   
             }
             if(element.textContent==rm){
-                socketio.emit("joinroom_to_server", {joinroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
+                // socketio.emit("joinroom_to_server", {joinroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
+                socketio.emit("pass_to_server", {joinroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
                 break;
-            }             
+            }
            }
            else{
              alert("You are already in this room");

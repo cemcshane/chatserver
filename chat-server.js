@@ -24,9 +24,11 @@ app.listen(3456);
 var io = socketio.listen(app);
 let mems = [[]];
 let pwds = new Map();
+let prvs = new Map();
 let roomId = 0;
 let map = new Map();
 map.set("Main Chat Room", 0);
+prvs.set("Main Chat Room", "no");
 io.sockets.on("connection", function(socket){
     // This callback runs when a new Socket.IO connection is established.
     socket.on('name_to_server', function(data) {
@@ -44,6 +46,13 @@ io.sockets.on("connection", function(socket){
     });
     socket.on('room_to_server', function(data) {
         // This callback runs when the server receives a new message from the client.
+        if(data["prv"]=="yes"){
+            pwds.set(data["newroom"], data["pwd"]);
+            prvs.set(data["newroom"], "yes");
+        }
+        else{
+            prvs.set(data["newroom"], "no");
+        }
         socket.join(data["newroom"]);
         socket.leave(data["curr"]);
         mems[map.get(data["curr"])] = mems[map.get(data["curr"])].filter(name => name!=socket.nickname);
@@ -57,6 +66,23 @@ io.sockets.on("connection", function(socket){
         socket.emit("joinroom_to_client",{room:data["newroom"], change:"yes", user:socket.nickname, users:mems[map.get(data["newroom"])]});
         io.to(data["newroom"]).emit("joinroom_to_client",{room:data["newroom"], change:"no", user:socket.nickname, users:mems[map.get(data["newroom"])]});
         io.to(data["curr"]).emit("joinroom_to_client",{room:data["curr"], change:"no", user:socket.nickname, users:mems[map.get(data["curr"])]});
+    });
+    socket.on('pass_to_server', function(data) {
+        if(prvs.get(data["joinroom"])=="yes"){
+            socket.emit("pass_to_client", {joinroom:data["joinroom"], curr:data["curr"]});
+        }
+        else{
+		    socket.emit("canjoin", {joinroom:data["joinroom"], curr:data["curr"]}); // broadcast the message to other users
+        }
+    });
+    socket.on("passcheck", function(data){
+        let pw = data["guess"];
+        if(pw==pwds.get(data["joinroom"])){
+            socket.emit("canjoin", {joinroom:data["joinroom"], curr:data["curr"]});
+        }
+        else{
+            socket.emit("incorrectpass");
+        }
     });
     socket.on('joinroom_to_server', function(data) {
         // This callback runs when the server receives a new message from the client.
