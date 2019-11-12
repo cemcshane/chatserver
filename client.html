@@ -65,6 +65,14 @@
           // while loop code found on https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
           while (document.getElementById("memberlist").firstChild){
               document.getElementById("memberlist").removeChild(document.getElementById("memberlist").firstChild);
+          }          
+          if(data["creator"]=="yes"){
+            alert("creator");
+            document.getElementById("admin").style.visibility = "visible";
+          }
+          if(data["creator"]=="no"){
+            alert("not creator");
+            document.getElementById("admin").style.visibility = "hidden";
           }
           if (data["change"]=="yes"){
             while (document.getElementById("chatlog").firstChild) {
@@ -109,7 +117,6 @@
                priv="no";
                socketio.emit("room_to_server", {prv:priv, pwd:pass, newroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
              }
-              
            }
          } 
       }
@@ -136,6 +143,12 @@
           var name = document.getElementById("nick").value;
           socketio.emit("name_to_server", {nickname:name});
       }
+      function kickOut(){
+        // do something
+      }
+      function ban(){
+        // do something
+      }
       </script>
    </head>
    <body>
@@ -151,6 +164,17 @@
         <div id="memberlist"></div>
       </div>
       <div id="roomlist">
+        <div id="admin" style="visibility:hidden;">
+          <h3>You are the room administrator</h3>
+          <strong>Kick out a user:</strong>
+            <input type="text" id="kickUser" placeholder="User's name"/>
+            <button onclick="kickOut()">Remove</button>    
+            <br><br>     
+          <strong>Ban a user:</strong>
+            <input type="text" id="banUser" placeholder="User's name"/>
+            <button onclick="ban()">Ban</button>    
+            <br><br>        
+        </div>
         <strong>Create a chat room:</strong>
             <input type="text" id="newRoom" placeholder="Room name"/>
             <br>
