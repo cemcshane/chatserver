@@ -67,11 +67,9 @@
               document.getElementById("memberlist").removeChild(document.getElementById("memberlist").firstChild);
           }          
           if(data["creator"]=="yes"){
-            alert("creator");
             document.getElementById("admin").style.visibility = "visible";
           }
           if(data["creator"]=="no"){
-            alert("not creator");
             document.getElementById("admin").style.visibility = "hidden";
           }
           if (data["change"]=="yes"){
@@ -94,6 +92,10 @@
         });
         socketio.on("canjoin", function(data){
             socketio.emit("joinroom_to_server", {joinroom:data["joinroom"], curr:data["curr"]});
+        });
+        socketio.on("startkick", function(data){
+            alert("You've been kicked out by the administrator and redirected to the main chat room.");
+            socketio.emit("joinroom_to_server", {joinroom:"Main Chat Room", curr:data["kickedroom"]});
         });
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
@@ -144,9 +146,12 @@
           socketio.emit("name_to_server", {nickname:name});
       }
       function kickOut(){
-        // do something
+        let kicked = document.getElementById("kickUser").value;
+        socketio.emit("kick_to_server", {name:kicked, curr:`${document.getElementById("thisroom").innerHTML}`});
       }
       function ban(){
+        let banned = document.getElementById("banUser").value;
+        socketio.emit("ban_to_server", {name:banned});
         // do something
       }
       </script>

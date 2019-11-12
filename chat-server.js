@@ -28,12 +28,13 @@ let prvs = new Map();
 let roomId = 0;
 let map = new Map();
 let creators = new Map();
+let ids = new Map();
 map.set("Main Chat Room", 0);
 prvs.set("Main Chat Room", "no");
 io.sockets.on("connection", function(socket){
     // This callback runs when a new Socket.IO connection is established.
     socket.on('name_to_server', function(data) {
-		// This callback runs when the server receives a new message from the client.
+		ids.set(socket.id, data["nickname"]);
         console.log("nickname: "+data["nickname"]); // log it to the Node.JS output
         socket.nickname = data["nickname"];
         socket.join("Main Chat Room");
@@ -102,5 +103,13 @@ io.sockets.on("connection", function(socket){
 		socket.emit("joinroom_to_client",{creator:crtr, change:"yes", room:data["joinroom"], user:socket.nickname, users:mems[map.get(data["joinroom"])]}); // broadcast the message to other users
         io.to(data["joinroom"]).emit("joinroom_to_client",{creator:"", room:data["joinroom"], change:"no", user:socket.nickname, users:mems[map.get(data["joinroom"])]});
         io.to(data["curr"]).emit("joinroom_to_client",{creator:"", room:data["curr"], change:"no", user:socket.nickname, users:mems[map.get(data["curr"])]});
+    });
+    socket.on("kick_to_server", function(data){
+        let ppl = io.sockets.adapter.rooms[data["curr"]].sockets;
+        for (let id in ppl){
+            if(ids.get(id)==data["name"]){
+                io.to(`${id}`).emit("startkick", {name:data["name"], kickedroom:data["curr"]});
+            } 
+        }
     });
 });
