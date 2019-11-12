@@ -87,25 +87,6 @@
         socketio.on("canjoin", function(data){
             socketio.emit("joinroom_to_server", {joinroom:data["joinroom"], curr:data["curr"]});
         });
-      // function clearMems(array){
-      //   let k=0;
-      //   let i;
-      //   // do case for when array is longer than current one
-      //     for (i=0; i<2*document.getElementById("memberlist").childElementCount; i++) {
-      //         if (i>(2*array.length-1)){
-      //           document.getElementById("memberlist").removeChild(document.getElementById("memberlist").childNodes[i]);
-      //         }
-      //         else{
-      //           if (i%2==0){
-      //             document.getElementById("memberlist").replaceChild(document.createTextNode(array[k]), document.getElementById("memberlist").childNodes[i]);
-      //             k++;
-      //           }
-      //           else{
-      //             document.getElementById("memberlist").replaceChild(document.createElement("br"), document.getElementById("memberlist").childNodes[i]);
-      //           }             
-      //         }
-      //     }
-      // }
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
          socketio.emit("message_to_server", {message:msg, room:`${document.getElementById("thisroom").innerHTML}`});
