@@ -30,6 +30,7 @@ let map = new Map();
 let creators = new Map();
 let ids = new Map();
 let banned = new Map();
+let rooms = [];
 map.set("Main Chat Room", 0);
 prvs.set("Main Chat Room", "no");
 io.sockets.on("connection", function(socket){
@@ -41,7 +42,7 @@ io.sockets.on("connection", function(socket){
         socket.join("Main Chat Room");
         mems[0].push([data["nickname"]]);
         socket.emit("seename", {nickname:data["nickname"]});
-		io.in("Main Chat Room").emit("name_to_client",{nickname:data["nickname"], users:mems[0]}); // broadcast the message to other users
+		io.in("Main Chat Room").emit("name_to_client",{rms:rooms, nickname:data["nickname"], users:mems[0]}); // broadcast the message to other users
     });
 	socket.on('message_to_server', function(data) {
 		// This callback runs when the server receives a new message from the client.
@@ -65,6 +66,7 @@ io.sockets.on("connection", function(socket){
         let arry = [];
         arry.push(socket.nickname);
         mems.push(arry);
+        rooms.push(data["newroom"]);
         console.log("Room joined: "+data["newroom"]); // log it to the Node.JS output
 		io.sockets.emit("room_to_client",{room:data["newroom"], user:socket.nickname}) // broadcast the message to other users
         socket.emit("joinroom_to_client",{creator:"yes", room:data["newroom"], change:"yes", user:socket.nickname, users:mems[map.get(data["newroom"])]});

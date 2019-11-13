@@ -50,6 +50,10 @@
               document.getElementById("memberlist").appendChild(document.createTextNode(element));
               document.getElementById("memberlist").appendChild(document.createElement("br"));
             });
+            data["rms"].forEach(rm => {
+              document.getElementById("rooms").appendChild(document.createTextNode(`${rm}`));
+              document.getElementById("rooms").appendChild(document.createElement("br"));
+            });
         });
         socketio.on("seename", function(data){
             document.getElementById("greeting").innerHTML = `${data["nickname"]}`;
