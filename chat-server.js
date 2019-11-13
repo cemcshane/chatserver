@@ -117,22 +117,30 @@ io.sockets.on("connection", function(socket){
     socket.on("ban_to_server", function(data){
         for (let id in io.sockets.adapter.rooms[data["curr"]].sockets){
             if(ids.get(id)==data["name"]){
-                banned.set(data["curr"], [data["name"]]);
+                if(banned.get(data["curr"])==null){
+                    banned.set(data["curr"], [data["name"]]);
+                }
+                else{
+                    banned.get(data["curr"]).push(data["name"]);
+                }
                 io.to(`${id}`).emit("startkick", {name:data["name"], kickedroom:data["curr"]});
             } 
         }
     });
     socket.on("bancheck", function(data){
+        let ban = "no";
         if(banned.get(data["room"])!=null){
             banned.get(data["room"]).forEach(user => {
                 if(user==data["name"]){
+                    console.log("user is banned");
+                    ban = "yes";
                     socket.emit("ban_return", {banned:"yes", room:data["room"]});
                 }
-                if(user==banned.get(data["room"])[banned.get(data["room"]).length-1]&&user!=data["name"]){
+                if(ban=="no"&&user==banned.get(data["room"])[banned.get(data["room"]).length-1]&&user!=data["name"]){
                     console.log("user not banned");
                     socket.emit("ban_return", {banned:"no", room:data["room"]});
                 }
-            });             
+            });
         }
         else{
             console.log("not iterable");
