@@ -109,6 +109,20 @@ io.sockets.on("connection", function(socket){
         io.to(data["joinroom"]).emit("joinroom_to_client",{creator:"", room:data["joinroom"], change:"no", user:socket.nickname, users:mems[map.get(data["joinroom"])]});
         io.to(data["curr"]).emit("joinroom_to_client",{creator:"", room:data["curr"], change:"no", user:socket.nickname, users:mems[map.get(data["curr"])]});
     });
+    socket.on("priv_to_server", function(data){
+        let sent="no";
+            for (let id in io.sockets.adapter.rooms[data["curr"]].sockets){
+                if(ids.get(id)==data["to"]){
+                    sent = "yes";
+                    io.to(`${id}`).emit("getpriv", {name:data["name"], message:data["message"], to:data["to"]});
+                    socket.emit("sentpriv", {success:"yes", to:data["to"], name:data["name"]});
+                    break;
+                }
+            }
+            if(sent=="no"){
+                socket.emit("sentpriv", {success:"no", to:data["to"], name:data["name"]});
+            }            
+    });
     socket.on("kick_to_server", function(data){
         for (let id in io.sockets.adapter.rooms[data["curr"]].sockets){
             if(ids.get(id)==data["name"]){

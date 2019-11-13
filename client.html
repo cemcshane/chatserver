@@ -100,6 +100,17 @@
         socketio.on("canjoin", function(data){
             socketio.emit("joinroom_to_server", {joinroom:data["joinroom"], curr:data["curr"]});
         });
+        socketio.on("sentpriv", function(data){
+            if(data["success"]=="yes"){
+              alert(`${data["to"]} has been alerted of your message.`);
+            }
+            if(data["success"]=="no"){
+              alert("The recipient of your private message was not found in the room.");
+            }
+        });
+        socketio.on("getpriv", function(data){
+            alert(`${data["name"]} sent you a message: "${data["message"]}". Respond by using the private message form.`);
+        });
         socketio.on("startkick", function(data){
             alert("You've been kicked out by the administrator and redirected to the main chat room.");
             socketio.emit("joinroom_to_server", {joinroom:"Main Chat Room", curr:data["kickedroom"]});
@@ -167,6 +178,11 @@
         let banned = document.getElementById("banUser").value;
         socketio.emit("ban_to_server", {name:banned, curr:`${document.getElementById("thisroom").innerHTML}`});
       }
+      function privateMessage(){
+        let msg = document.getElementById("private_message").value;
+        let rcvr = document.getElementById("private_receiver").value;
+        socketio.emit("priv_to_server", {name:document.getElementById("greeting").innerHTML, message:msg, to:rcvr, curr:`${document.getElementById("thisroom").innerHTML}`});
+      }
       </script>
    </head>
    <body>
@@ -210,7 +226,14 @@
         <div id="rooms">Main Chat Room<br></div>
       </div>
       <div id="msging">
-        Send a message:
+        <strong>Send a private message to someone in the room:</strong>
+          <br>
+          To: <input type="text" id="private_receiver" placeholder="User's name"/>
+          <br>
+          <input type="text" id="private_message" placeholder="Type message here"/>
+          <button onclick="privateMessage()">Send</button>
+          <br><br>
+        <strong>Send a message to the room:</strong>
           <input type="text" id="message_input"/>
           <button onclick="sendMessage()">Send</button>
           <div id="chatlog"></div>
