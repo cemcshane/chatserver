@@ -132,12 +132,14 @@ io.sockets.on("connection", function(socket){
     socket.on("rando_to_server", function(data){
         let avail = rooms.filter(room => prvs.get(room)=="no"&&checkBanned(room, data["name"])=="no"&&room!=data["curr"]);
         console.log(`avail= ${avail}`);
+        // line below found on https://stackoverflow.com/questions/4550505/getting-a-random-value-from-a-javascript-array
         let rand = avail[Math.floor(Math.random() * avail.length)];
         console.log(`rand= ${rand}`);
         socket.emit("startrand", {name:data["name"], room:rand});
     });
     socket.on("priv_to_server", function(data){
         let sent="no";
+        // line below found on https://stackoverflow.com/questions/6563885/socket-io-how-do-i-get-a-list-of-connected-sockets-clients
             for (let id in io.sockets.adapter.rooms[data["curr"]].sockets){
                 if(ids.get(id)==data["to"]){
                     sent = "yes";
@@ -151,6 +153,7 @@ io.sockets.on("connection", function(socket){
             }
     });
     socket.on("kick_to_server", function(data){
+    // line below found on https://stackoverflow.com/questions/6563885/socket-io-how-do-i-get-a-list-of-connected-sockets-clients
         for (let id in io.sockets.adapter.rooms[data["curr"]].sockets){
             if(ids.get(id)==data["name"]){
                 io.to(`${id}`).emit("startkick", {name:data["name"], kickedroom:data["curr"]});
