@@ -46,6 +46,9 @@
             while (document.getElementById("memberlist").firstChild){
               document.getElementById("memberlist").removeChild(document.getElementById("memberlist").firstChild);
             }
+            while (document.getElementById("rooms").firstChild){
+              document.getElementById("rooms").removeChild(document.getElementById("rooms").firstChild);
+            }
             data["users"].forEach(element => {
               document.getElementById("memberlist").appendChild(document.createTextNode(element));
               document.getElementById("memberlist").appendChild(document.createElement("br"));
@@ -137,6 +140,14 @@
             alert("The owner has banned you from this room.");
           }
         });
+        socketio.on("startrand", function(data){
+          if(data["room"]==null){
+            alert("There are no available public rooms at this time that you aren't already in.");
+          }
+          else{
+            socketio.emit("bancheck", {room:data["room"], name:document.getElementById("greeting").innerHTML});
+          }
+        });
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
          socketio.emit("message_to_server", {message:msg, room:`${document.getElementById("thisroom").innerHTML}`});
@@ -165,6 +176,9 @@
       function joinRoom(){
          var rm = document.getElementById("joinRoom").value;
          socketio.emit("bancheck", {room:rm, name:document.getElementById("greeting").innerHTML});
+      }
+      function joinRandom(){
+        socketio.emit("rando_to_server", {curr:document.getElementById("thisroom").innerHTML, name:document.getElementById("greeting").innerHTML});
       }
       function createNick(){
           var name = document.getElementById("nick").value;
@@ -221,6 +235,9 @@
         <strong>Join a chat room:</strong>
             <input type="text" id="joinRoom" placeholder="Room name"/>
             <button onclick="joinRoom()">Join room</button>    
+            <br><br>
+        <strong>Join a random chat room:</strong>
+            <button onclick="joinRandom()">Join</button>    
             <br><br>
         <span id="roomlisttitle">Available Rooms:</span>
         <div id="rooms">Main Chat Room<br></div>

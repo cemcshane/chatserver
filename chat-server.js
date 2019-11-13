@@ -30,7 +30,7 @@ let map = new Map();
 let creators = new Map();
 let ids = new Map();
 let banned = new Map();
-let rooms = [];
+let rooms = ["Main Chat Room"];
 map.set("Main Chat Room", 0);
 prvs.set("Main Chat Room", "no");
 io.sockets.on("connection", function(socket){
@@ -109,6 +109,33 @@ io.sockets.on("connection", function(socket){
         io.to(data["joinroom"]).emit("joinroom_to_client",{creator:"", room:data["joinroom"], change:"no", user:socket.nickname, users:mems[map.get(data["joinroom"])]});
         io.to(data["curr"]).emit("joinroom_to_client",{creator:"", room:data["curr"], change:"no", user:socket.nickname, users:mems[map.get(data["curr"])]});
     });
+    function checkBanned(room, name){
+        let ban = "no";
+        if(banned.get(room)!=null){
+            banned.get(room).forEach(user => {
+                if(user==name){
+                    ban = "yes";
+                    console.log("true");
+                    return "yes";
+                }
+                if(ban=="no"&&user==banned.get(room)[banned.get(room).length-1]&&user!=name){
+                    console.log("false");
+                    return "no";
+                }
+            });
+        }
+        else{
+            console.log("false");
+            return "no";
+        } 
+    }
+    socket.on("rando_to_server", function(data){
+        let avail = rooms.filter(room => prvs.get(room)=="no"&&checkBanned(room, data["name"])=="no"&&room!=data["curr"]);
+        console.log(`avail= ${avail}`);
+        let rand = avail[Math.floor(Math.random() * avail.length)];
+        console.log(`rand= ${rand}`);
+        socket.emit("startrand", {name:data["name"], room:rand});
+    });
     socket.on("priv_to_server", function(data){
         let sent="no";
             for (let id in io.sockets.adapter.rooms[data["curr"]].sockets){
@@ -121,7 +148,7 @@ io.sockets.on("connection", function(socket){
             }
             if(sent=="no"){
                 socket.emit("sentpriv", {success:"no", to:data["to"], name:data["name"]});
-            }            
+            }
     });
     socket.on("kick_to_server", function(data){
         for (let id in io.sockets.adapter.rooms[data["curr"]].sockets){
