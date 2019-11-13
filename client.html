@@ -51,6 +51,9 @@
               document.getElementById("memberlist").appendChild(document.createElement("br"));
             });
         });
+        socketio.on("seename", function(data){
+            document.getElementById("greeting").innerHTML = `${data["nickname"]}`;
+        });
         socketio.on("message_to_client",function(data) {
             //Append an HR thematic break and the escaped HTML of the new message
             document.getElementById("chatlog").appendChild(document.createElement("hr"));
@@ -97,6 +100,28 @@
             alert("You've been kicked out by the administrator and redirected to the main chat room.");
             socketio.emit("joinroom_to_server", {joinroom:"Main Chat Room", curr:data["kickedroom"]});
         });
+        socketio.on("ban_return", function(data){
+          if(data["banned"]=="no"){
+            for (let element of document.getElementById("rooms").childNodes){
+              if(data["room"]!=document.getElementById("thisroom").textContent){
+                if (document.getElementById("rooms").lastChild==element&&element!=data["room"]){
+                    alert("This room doesn't exist");   
+                }
+                if(element.textContent==data["room"]){
+                    socketio.emit("pass_to_server", {joinroom:data["room"], curr:`${document.getElementById("thisroom").innerHTML}`});
+                    break;
+                }
+              }
+              else{
+                alert("You are already in this room");
+                break;
+              }
+            } 
+          }
+          else{
+            alert("The owner has banned you from this room.");
+          }
+        });
       function sendMessage(){
          var msg = document.getElementById("message_input").value;
          socketio.emit("message_to_server", {message:msg, room:`${document.getElementById("thisroom").innerHTML}`});
@@ -124,22 +149,7 @@
       }
       function joinRoom(){
          var rm = document.getElementById("joinRoom").value;
-         for (let element of document.getElementById("rooms").childNodes){
-           if(rm!=document.getElementById("thisroom").textContent){
-            if (document.getElementById("rooms").lastChild==element&&element!=rm){
-                alert("This room doesn't exist");   
-            }
-            if(element.textContent==rm){
-                // socketio.emit("joinroom_to_server", {joinroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
-                socketio.emit("pass_to_server", {joinroom:rm, curr:`${document.getElementById("thisroom").innerHTML}`});
-                break;
-            }
-           }
-           else{
-             alert("You are already in this room");
-             break;
-           }
-         }  
+         socketio.emit("bancheck", {room:rm, name:document.getElementById("greeting").innerHTML});
       }
       function createNick(){
           var name = document.getElementById("nick").value;
@@ -151,13 +161,13 @@
       }
       function ban(){
         let banned = document.getElementById("banUser").value;
-        socketio.emit("ban_to_server", {name:banned});
-        // do something
+        socketio.emit("ban_to_server", {name:banned, curr:`${document.getElementById("thisroom").innerHTML}`});
       }
       </script>
    </head>
    <body>
      <h1 id="thisroom">Main Chat Room</h1>
+     <h2 id="greeting" style="visibility:hidden;"></h2>
     <div id="displayNickname">
       Nickname:
         <input type="text" id="nick"/>

@@ -29,6 +29,7 @@ let roomId = 0;
 let map = new Map();
 let creators = new Map();
 let ids = new Map();
+let banned = new Map();
 map.set("Main Chat Room", 0);
 prvs.set("Main Chat Room", "no");
 io.sockets.on("connection", function(socket){
@@ -39,6 +40,7 @@ io.sockets.on("connection", function(socket){
         socket.nickname = data["nickname"];
         socket.join("Main Chat Room");
         mems[0].push([data["nickname"]]);
+        socket.emit("seename", {nickname:data["nickname"]});
 		io.in("Main Chat Room").emit("name_to_client",{nickname:data["nickname"], users:mems[0]}); // broadcast the message to other users
     });
 	socket.on('message_to_server', function(data) {
@@ -87,7 +89,6 @@ io.sockets.on("connection", function(socket){
         }
     });
     socket.on('joinroom_to_server', function(data) {
-        // This callback runs when the server receives a new message from the client.
         let crtr;
         if(creators.get(data["joinroom"])==socket.nickname){
             crtr = "yes";
@@ -100,16 +101,42 @@ io.sockets.on("connection", function(socket){
         mems[map.get(data["curr"])] = mems[map.get(data["curr"])].filter(name => name!=socket.nickname);
         mems[map.get(data["joinroom"])].push(socket.nickname);
         console.log("Room joined: "+data["joinroom"]); // log it to the Node.JS output
+        console.log(`Leaving room: ${mems[map.get(data["curr"])]}`);
+        console.log(`Joining room: ${mems[map.get(data["joinroom"])]}`);
 		socket.emit("joinroom_to_client",{creator:crtr, change:"yes", room:data["joinroom"], user:socket.nickname, users:mems[map.get(data["joinroom"])]}); // broadcast the message to other users
         io.to(data["joinroom"]).emit("joinroom_to_client",{creator:"", room:data["joinroom"], change:"no", user:socket.nickname, users:mems[map.get(data["joinroom"])]});
         io.to(data["curr"]).emit("joinroom_to_client",{creator:"", room:data["curr"], change:"no", user:socket.nickname, users:mems[map.get(data["curr"])]});
     });
     socket.on("kick_to_server", function(data){
-        let ppl = io.sockets.adapter.rooms[data["curr"]].sockets;
-        for (let id in ppl){
+        for (let id in io.sockets.adapter.rooms[data["curr"]].sockets){
             if(ids.get(id)==data["name"]){
                 io.to(`${id}`).emit("startkick", {name:data["name"], kickedroom:data["curr"]});
             } 
+        }
+    });
+    socket.on("ban_to_server", function(data){
+        for (let id in io.sockets.adapter.rooms[data["curr"]].sockets){
+            if(ids.get(id)==data["name"]){
+                banned.set(data["curr"], [data["name"]]);
+                io.to(`${id}`).emit("startkick", {name:data["name"], kickedroom:data["curr"]});
+            } 
+        }
+    });
+    socket.on("bancheck", function(data){
+        if(banned.get(data["room"])!=null){
+            banned.get(data["room"]).forEach(user => {
+                if(user==data["name"]){
+                    socket.emit("ban_return", {banned:"yes", room:data["room"]});
+                }
+                if(user==banned.get(data["room"])[banned.get(data["room"]).length-1]&&user!=data["name"]){
+                    console.log("user not banned");
+                    socket.emit("ban_return", {banned:"no", room:data["room"]});
+                }
+            });             
+        }
+        else{
+            console.log("not iterable");
+            socket.emit("ban_return", {banned:"no", room:data["room"]});
         }
     });
 });
