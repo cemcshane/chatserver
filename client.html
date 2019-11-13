@@ -43,7 +43,7 @@
         socketio.on("name_to_client",function(data) {
             document.getElementById("displayNickname").style.visibility = "hidden";
             document.getElementById("displayChat").style.visibility = "visible";
-            // both while loops code found on
+            // both while loops code found on https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
             while (document.getElementById("memberlist").firstChild){
               document.getElementById("memberlist").removeChild(document.getElementById("memberlist").firstChild);
             }
